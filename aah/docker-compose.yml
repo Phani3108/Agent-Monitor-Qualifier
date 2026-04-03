@@ -1,0 +1,30 @@
+version: '3.9'
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: aah
+      POSTGRES_PASSWORD: aah
+      POSTGRES_DB: aah
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aah"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  api:
+    build: ./backend
+    command: uvicorn aah_api.main:app --host 0.0.0.0 --port 8080 --reload
+    environment:
+      DATABASE_URL: postgresql://aah:aah@postgres:5432/aah
+      TEAMS_WEBHOOK: ${TEAMS_WEBHOOK}
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+      - ./specs:/specs
+      - ./artifacts:/artifacts

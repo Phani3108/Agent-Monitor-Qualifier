@@ -1,0 +1,33 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/teams/v1.16/MicrosoftTeams.schema.json",
+  "manifestVersion": "1.16",
+  "version": "0.1.0",
+  "id": "00000000-0000-0000-0000-000000000000",
+  "packageName": "com.example.aah",
+  "name": { "short": "AAH", "full": "Agent Auditor & Hardener" },
+  "developer": {
+    "name": "AAH Local",
+    "websiteUrl": "http://localhost:3000",
+    "privacyUrl": "http://localhost:3000",
+    "termsOfUseUrl": "http://localhost:3000"
+  },
+  "description": {
+    "short": "AAH dashboard",
+    "full": "Run packs, view Trust Reports, badges, incidents, and baselines."
+  },
+  "icons": {
+    "color": "color.png",
+    "outline": "outline.png"
+  },
+  "staticTabs": [
+    {
+      "entityId": "aah-home",
+      "name": "AAH",
+      "contentUrl": "http://localhost:3000",
+      "websiteUrl": "http://localhost:3000",
+      "scopes": ["personal"]
+    }
+  ],
+  "accentColor": "#0b62d6",
+  "validDomains": ["localhost"]
+}

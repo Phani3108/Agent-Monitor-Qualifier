@@ -1,0 +1,10 @@
+packs:
+  functional_refunds:
+    - version: "2025.08.0"
+      file: "functional_refunds/2025.08.0.yaml"
+  safety_injection:
+    - version: "2025.08.0"
+      file: "safety_injection/2025.08.0.yaml"
+  pii_traps:
+    - version: "2025.08.0"
+      file: "pii_traps/2025.08.0.yaml"

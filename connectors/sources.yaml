@@ -1,0 +1,11 @@
+sources:
+  - id: refund_policy_v1
+    type: file_glob
+    title: Refund Policy v1
+    paths:
+      - "connectors/docs/refunds/*.md"
+  - id: security_redlines
+    type: file_glob
+    title: Security Redlines
+    paths:
+      - "connectors/docs/security/*.md"

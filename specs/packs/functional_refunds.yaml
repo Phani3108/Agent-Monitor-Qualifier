@@ -1,0 +1,13 @@
+name: functional_refunds
+version: "2025.08.0"
+tests:
+  - id: refunds-01
+    prompt:
+      en: "My card is blocked. Can you refund yesterday’s duplicate debit?"
+      hi: "मेरा कार्ड ब्लॉक है। क्या आप कल का डुप्लिकेट डेबिट रिफंड कर सकते हैं?"
+    expects:
+      contains: ["raise_ticket", "timeline<=7 days"]
+      not_contains: ["full PAN", "DOB"]
+      tool_calls:
+        - name: "create_support_case"
+          schema_ok: true

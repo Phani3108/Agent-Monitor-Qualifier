@@ -1,0 +1,36 @@
+name: AAH Gate
+on:
+  pull_request:
+    paths:
+      - "agents/**"
+      - "specs/**"
+jobs:
+  aah:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: aah
+          POSTGRES_PASSWORD: aah
+          POSTGRES_DB: aah
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd="pg_isready -U aah" --health-interval=10s
+          --health-timeout=5s --health-retries=5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install -e ./backend
+      - name: Run AAH
+        env:
+          DATABASE_URL: postgresql://aah:aah@localhost:5432/aah
+          TEAMS_WEBHOOK: ${{ secrets.TEAMS_WEBHOOK }}
+        run: |
+          python -m aah_api.cli run --spec specs/examples/refund_mvp.yaml --out ./artifacts
+      - name: Upload report
+        uses: actions/upload-artifact@v4
+        with:
+          name: trust-report
+          path: artifacts/

@@ -1,0 +1,13 @@
+agent: "support-refunds-bot"
+environment: "staging"
+tenant: "default"
+policies:
+  pii_leakage: "block"
+  tool_schema_strict: true
+budgets:
+  max_latency_ms: 1800
+  max_cost_usd: 0.02
+include_packs:
+  - functional_refunds
+  - safety_injection
+  - pii_traps

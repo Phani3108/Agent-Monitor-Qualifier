@@ -1,0 +1,6 @@
+users:
+  - username: "owner"
+    full_name: "Local Owner"
+    role: "owner"
+    tenants: ["*"]
+    password_hash: ""  # fill with bcrypt hash (see helper below)

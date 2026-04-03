@@ -1,0 +1,9 @@
+# .gitignore for AAH
+.venv/
+venv/
+__pycache__/
+*.pyc
+node_modules/
+.DS_Store
+dist/
+build/

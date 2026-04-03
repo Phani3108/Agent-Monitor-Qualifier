@@ -1,0 +1,47 @@
+<!doctype html>
+<html><head>
+<meta charset="utf-8"/>
+<title>AAH Compare — {{ base.run_id }} → {{ head.run_id }}</title>
+<style>
+body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;margin:24px;line-height:1.45}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.card{border:1px solid #ddd;border-radius:12px;padding:16px}
+.pass{color:#0a7a3e}.fail{color:#b00020}
+.diff{font-weight:700}
+code{background:#f6f8fa;border-radius:6px;padding:2px 6px}
+table{border-collapse:collapse;width:100%} th,td{border:1px solid #eee;padding:8px;text-align:left}
+.small{font-size:12px;color:#444}
+</style>
+</head><body>
+<h1>AAH Run Comparison</h1>
+<p><strong>Base:</strong> <code>{{ base.run_id }}</code> ({{ base.created_at }}) • Score {{ base.scores.overall }} • {{ "CERTIFIED" if base.certified else "NOT CERTIFIED" }}<br/>
+<strong>Head:</strong> <code>{{ head.run_id }}</code> ({{ head.created_at }}) • Score {{ head.scores.overall }} • {{ "CERTIFIED" if head.certified else "NOT CERTIFIED" }}</p>
+
+<div class="grid">
+  <div class="card">Overall Δ: <span class="diff">{{ score_delta.overall }}</span></div>
+  <div class="card">Functional Δ: <span class="diff">{{ score_delta.functional }}</span></div>
+  <div class="card">Safety Δ: <span class="diff">{{ score_delta.safety }}</span></div>
+  <div class="card">Determinism Δ: <span class="diff">{{ score_delta.determinism }}</span></div>
+</div>
+
+<h2>Regressions ({{ totals.regressions }})</h2>
+<table>
+<thead><tr><th>Test</th><th>Status</th><th>New failing assertions</th></tr></thead>
+<tbody>
+{% for r in regressions %}
+<tr><td><code>{{ r.test }}</code></td><td class="fail">{{ r.from }} → {{ r.to }}</td><td>{{ r.new_failures|join(", ") }}</td></tr>
+{% endfor %}
+{% if totals.regressions == 0 %}<tr><td colspan="3" class="pass">No regressions 🎉</td></tr>{% endif %}
+</tbody></table>
+
+<h2>Improvements ({{ totals.improvements }})</h2>
+<table>
+<thead><tr><th>Test</th><th>Status</th></tr></thead>
+<tbody>
+{% for r in improvements %}
+<tr><td><code>{{ r.test }}</code></td><td class="pass">{{ r.from }} → {{ r.to }}</td></tr>
+{% endfor %}
+{% if totals.improvements == 0 %}<tr><td colspan="2">No improvements</td></tr>{% endif %}
+</tbody></table>
+
+</body></html>

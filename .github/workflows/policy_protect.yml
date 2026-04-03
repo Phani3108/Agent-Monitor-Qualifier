@@ -1,0 +1,51 @@
+name: AAH Policy & Gates
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled]
+jobs:
+  protect_docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+      - name: Block edits to Master_file.md / Truth_policy.md unless labeled policy-change
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          CHANGED=$(git diff --name-only "$BASE_SHA" "$HEAD_SHA" || true)
+          if echo "$CHANGED" | grep -E '^Master_file\.md$|^Truth_policy\.md$' >/dev/null; then
+            LABELS=$(curl -s -H "Authorization: Bearer $GH_TOKEN" \
+              "https://api.github.com/repos/$REPO/issues/$PR_NUMBER/labels" | jq -r '.[].name')
+            echo "Labels on PR: $LABELS"
+            echo "$LABELS" | grep -qx "policy-change" || { echo "Missing required label policy-change for policy edits"; exit 1; }
+          fi
+
+  quality_gates:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install pyyaml jsonschema
+      - name: No placeholders
+        run: python tools/quality/no_placeholders.py
+      - name: Validate specs
+        run: python tools/quality/validate_spec.py
+      - name: Scan external calls
+        run: python tools/quality/scan_external_calls.py
+      - name: Install backend deps (for CLI)
+        run: pip install -e aah/backend
+      - name: Truth Policy hash must match
+        run: |
+          CODE_HASH=$(python -m aah_api.cli print-policy-hash)
+          FILE_HASH=$(sha256sum Truth_policy.md | awk '{print $1}')
+          echo "Code: $CODE_HASH"
+          echo "File: $FILE_HASH"
+          test "$CODE_HASH" = "$FILE_HASH" || (echo "Mismatch in Truth Policy hash"; exit 1)

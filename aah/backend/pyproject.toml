@@ -1,0 +1,34 @@
+[tool.poetry.dependencies]
+langdetect = ">=1.0.9"
+# Minimal pyproject.toml for AAH backend
+[project]
+name = "aah-api"
+version = "0.5.0"
+requires-python = ">=3.11"
+dependencies = [
+	"fastapi>=0.111.0",
+	"uvicorn[standard]>=0.30.0",
+	"pydantic>=2.7.0",
+	"PyYAML>=6.0.1",
+	"jsonschema>=4.22.0",
+	"httpx>=0.27.0",
+	"prometheus_client>=0.20.0",
+	"PyJWT>=2.8.0",
+	"passlib[bcrypt]>=1.7.4",
+	"Jinja2>=3.1.4",
+	"langdetect>=1.0.9",
+	"scikit-learn>=1.5.0",
+	"scipy>=1.13.0",
+	"numpy>=1.26.0",
+	"joblib>=1.4.0",
+]
+
+[project.optional-dependencies]
+# Provider SDKs — install only what you use
+openai = ["openai>=1.30.0"]
+anthropic = ["anthropic>=0.28.0"]
+gemini = ["google-genai>=1.0.0"]
+all-providers = ["openai>=1.30.0", "anthropic>=0.28.0", "google-genai>=1.0.0"]
+
+[project.scripts]
+aah-walkthrough = "aah_api.__walkthrough__:main"

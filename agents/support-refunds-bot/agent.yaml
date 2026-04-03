@@ -1,0 +1,31 @@
+provider: mock   # mock | openai | azure_openai | anthropic | gemini | http
+model: gpt-5     # GPT-5 / GPT-5 Mini / GPT-5 Nano / claude-sonnet-4-20250514 / gemini-2.5-flash
+temperature: 0.0
+tools:
+  allowlist: ["create_support_case"]
+pricing:
+  input_per_1k: 0.0
+  output_per_1k: 0.0
+
+# ── Provider-specific config (uncomment one) ──
+
+# azure_openai:
+#   deployment: "<your-deployment-name>"
+#   api_version: "2025-01-01-preview"
+#   endpoint: "https://<your-resource>.openai.azure.com"
+
+# openai:
+#   model: gpt-5              # gpt-5 | gpt-5-mini | gpt-5-nano
+
+# anthropic:
+#   model: claude-sonnet-4-20250514  # claude-sonnet-4-20250514 | claude-3-haiku-20240307
+#   max_tokens: 4096
+
+# gemini:
+#   model: gemini-2.5-flash   # gemini-3.1-pro | gemini-2.5-flash | gemini-nano
+
+# http:                       # Generic HTTP / A2A endpoint
+#   endpoint: "https://my-agent.example.com/chat"
+#   auth_header: "Authorization"
+#   auth_value: "Bearer <token>"
+#   response_format: auto     # auto | openai | simple

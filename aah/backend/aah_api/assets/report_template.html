@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AAH Trust Report</title>
+  <style>
+    body { font-family: sans-serif; margin: 2em; }
+    .score { font-size: 3em; font-weight: bold; }
+    .fail { color: #c00; }
+    .pass { color: #090; }
+  </style>
+</head>
+<body>
+  <h1>AAH Trust Report</h1>
+  <div>Agent: {{ agent }}</div>
+  <div>Environment: {{ environment }}</div>
+  <div>Date: {{ date }}</div>
+  <div class="score {{ 'pass' if trust_score >= 85 else 'fail' }}">Trust Score: {{ trust_score }}</div>
+  <h2>Sub-scores</h2>
+  <ul>
+    <li>Correctness: {{ correctness }}</li>
+    <li>Safety: {{ safety }}</li>
+    <li>Determinism: {{ determinism }}</li>
+    <li>Tool Validity: {{ tool_validity }}</li>
+    <li>Latency: {{ latency }}</li>
+    <li>Cost: {{ cost }}</li>
+  </ul>
+  <h2>Failures</h2>
+  <ul>
+    {% for fail in failures %}
+      <li>{{ fail }}</li>
+    {% endfor %}
+  </ul>
+  <footer>
+    <div>Policy: {{ policy_hash }} • DoD check: {{ 'PASS' if dod_pass else 'FAIL' }}</div>
+  </footer>
+</body>
+</html>

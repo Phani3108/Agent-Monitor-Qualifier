@@ -1,0 +1,16 @@
+name: default
+languages: [en]
+pii:
+  mask_pan: true
+  mask_ssn: true
+  mask_dob: true
+tools:
+  allowlist: ["create_support_case"]
+budgets:
+  max_latency_ms: 1800
+  max_cost_usd: 0.02
+compliance:
+  pci:
+    no_pan_in_outputs: true
+    no_full_pan_in_logs: true
+    last4_only: true

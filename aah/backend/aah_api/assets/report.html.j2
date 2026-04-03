@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>AAH Trust Report — {{ summary.run_id }}</title>
+  <style>
+    *{box-sizing:border-box}
+    body{font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;margin:0;line-height:1.5;background:#f8fafc;color:#1e293b}
+    .wrap{max-width:1100px;margin:0 auto;padding:24px 20px}
+    h1{font-size:1.5rem;font-weight:800;margin:0 0 4px}
+    h2{font-size:1.1rem;font-weight:700;margin:24px 0 12px;color:#334155}
+    h3{font-size:0.95rem;font-weight:600;margin:0 0 8px;color:#475569}
+    .meta{font-size:0.85rem;color:#64748b}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin:16px 0}
+    .card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:20px}
+    .score-val{font-size:2.5rem;font-weight:800;line-height:1.1}
+    .score-label{font-size:0.75rem;color:#64748b;text-transform:uppercase;letter-spacing:0.05em;margin-top:4px}
+    .cert-badge{display:inline-flex;align-items:center;gap:6px;border-radius:9999px;padding:6px 16px;font-weight:600;font-size:0.875rem}
+    .cert-yes{background:#d1fae5;color:#065f46}
+    .cert-no{background:#fee2e2;color:#991b1b}
+    code{background:#f1f5f9;border-radius:4px;padding:1px 5px;font-size:0.82rem}
+    .pass{color:#059669}.fail{color:#dc2626}
+    table{border-collapse:collapse;width:100%;font-size:0.85rem}
+    th{text-align:left;font-weight:600;color:#64748b;border-bottom:2px solid #e2e8f0;padding:8px 10px}
+    td{border-bottom:1px solid #f1f5f9;padding:8px 10px;vertical-align:top}
+    tr:hover{background:#f8fafc}
+    .assertion{display:inline-block;border-radius:4px;padding:1px 6px;margin:1px 2px;font-size:0.75rem;font-weight:500}
+    .assertion-pass{background:#d1fae5;color:#065f46}
+    .assertion-fail{background:#fee2e2;color:#991b1b}
+    .tag{display:inline-block;background:#ede9fe;color:#5b21b6;border-radius:9999px;padding:2px 10px;font-size:0.75rem;margin-right:4px}
+    details>summary{cursor:pointer;font-size:0.82rem;color:#4f46e5}
+    footer{margin-top:32px;padding-top:16px;border-top:1px solid #e2e8f0;font-size:0.75rem;color:#94a3b8}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <h1>AAH Trust Report</h1>
+  <p class="meta">
+    <strong>Run:</strong> <code>{{ summary.run_id }}</code> &middot;
+    <strong>Agent:</strong> {{ summary.agent }} ({{ summary.environment }})
+    {% if summary.created_at %} &middot; {{ summary.created_at }}{% endif %}
+  </p>
+
+  <!-- Scores -->
+  <div class="grid">
+    <div class="card" style="text-align:center">
+      <div class="score-val" style="color:{% if summary.scores.overall >= 90 %}#059669{% elif summary.scores.overall >= 70 %}#d97706{% else %}#dc2626{% endif %}">{{ summary.scores.overall }}</div>
+      <div class="score-label">Overall</div>
+    </div>
+    {% for key in ['functional','safety','determinism','compliance','tool_robustness'] %}
+    {% if summary.scores[key] is defined %}
+    <div class="card" style="text-align:center">
+      <div class="score-val" style="font-size:1.8rem;color:{% if summary.scores[key] >= 90 %}#059669{% elif summary.scores[key] >= 70 %}#d97706{% else %}#dc2626{% endif %}">{{ summary.scores[key] }}</div>
+      <div class="score-label">{{ key | replace('_',' ') | capitalize }}</div>
+    </div>
+    {% endif %}
+    {% endfor %}
+  </div>
+
+  <!-- Certification -->
+  <div class="card">
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+      <span class="cert-badge {{ 'cert-yes' if summary.certified else 'cert-no' }}">
+        {{ 'CERTIFIED ' ~ summary.cert.version if summary.certified else 'NOT CERTIFIED' }}
+      </span>
+      <img alt="badge" src="/runs/{{ summary.run_id }}/badge.svg" style="height:28px"/>
+    </div>
+    {% if summary.cert and summary.cert.reasons and (not summary.certified) %}
+    <ul style="margin:12px 0 0;padding-left:20px">
+      {% for r in summary.cert.reasons %}<li style="color:#991b1b;font-size:0.85rem">{{ r }}</li>{% endfor %}
+    </ul>
+    {% endif %}
+  </div>
+
+  <!-- Packs -->
+  <h2>Test Packs</h2>
+  {% for pack, pack_results in results.items() %}
+  {% if pack_results|length > 0 %}
+  <div class="card" style="margin-bottom:16px">
+    <h3>{{ pack | replace('_',' ') | capitalize }} <span class="meta">({{ pack_results|length }} tests)</span></h3>
+    <table>
+      <thead><tr>
+        <th>Test</th><th>Status</th><th>Latency</th><th>Cost</th>
+        {% if pack == 'grounding' %}<th>Evidence</th>{% endif %}
+        {% if pack == 'determinism' %}<th>Stats</th>{% endif %}
+        {% if pack == 'safety' %}<th>Category</th>{% endif %}
+        {% if pack == 'tool_robustness' %}<th>Category</th>{% endif %}
+        <th>Assertions</th>
+      </tr></thead>
+      <tbody>
+      {% for r in pack_results %}
+        <tr>
+          <td><code>{{ r.id }}</code></td>
+          <td><span class="{{ 'pass' if r.passed else 'fail' }}" style="font-weight:600">{{ 'PASS' if r.passed else 'FAIL' }}</span></td>
+          <td>{{ r.latency_ms }}ms</td>
+          <td>${{ "%.5f"|format(r.cost_usd) }}</td>
+          {% if pack == 'grounding' %}
+          <td>
+            {% set ev = r.meta and r.meta.evidence or [] %}
+            {% if ev|length == 0 %}<span class="meta">—</span>{% else %}
+              <details>
+                <summary>{{ ev|length }} passages</summary>
+                <ol style="margin:4px 0;padding-left:16px;font-size:0.8rem">
+                  {% for h in ev %}
+                    <li><code>{{ h.source_id }}</code> · {{ h.title }} · {{ "%.3f"|format(h.score) }}</li>
+                  {% endfor %}
+                </ol>
+              </details>
+            {% endif %}
+          </td>
+          {% endif %}
+          {% if pack == 'determinism' %}
+          <td style="font-size:0.8rem">
+            {% if r.meta and r.meta.latency_ms %}
+              det={{ r.meta.determinism_pct }}%
+              · p50/p95/p99={{ r.meta.latency_ms.p50 }}/{{ r.meta.latency_ms.p95 }}/{{ r.meta.latency_ms.p99 }}ms
+              · cv={{ r.meta.latency_ms.cv }}
+              · pass={{ r.meta.pass_rate_pct }}%
+            {% else %}—{% endif %}
+          </td>
+          {% endif %}
+          {% if pack == 'safety' %}
+          <td><span class="tag">{{ r.meta.category if r.meta else '—' }}</span></td>
+          {% endif %}
+          {% if pack == 'tool_robustness' %}
+          <td><span class="tag">{{ r.meta.category if r.meta else '—' }}</span></td>
+          {% endif %}
+          <td>
+            {% for a in r.assertions %}
+              <span class="assertion {{ 'assertion-pass' if a.passed else 'assertion-fail' }}">{{ a.type }}</span>
+            {% endfor %}
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+  {% endfor %}
+
+  <!-- Integrity -->
+  <h2>Policy &amp; Schema Integrity</h2>
+  <div class="card">
+    <p style="font-size:0.85rem;margin:0">
+      <strong>Truth Policy:</strong> <code>{{ summary.policy_hash[:32] }}…</code><br/>
+      <strong>Spec Schema:</strong> <code>{{ summary.spec_schema_hash[:32] }}…</code>
+    </p>
+  </div>
+
+  <footer>Generated by AAH v0.5.0 · This report honors the Truth Policy and Definition of Done.</footer>
+</div>
+</body>
+</html>

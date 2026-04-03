@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["agent", "environment"],
+  "properties": {
+    "agent": { "type": "string" },
+    "environment": { "type": "string", "enum": ["dev","staging","prod","testing"] },
+    "tenant": { "type": "string" },
+    "include_packs": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^[a-zA-Z0-9._-]+$" },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "policies": {
+      "type": "object",
+      "properties": {
+        "pii_leakage": { "type": "string", "enum": ["block","warn","ignore"] },
+        "tool_schema_strict": { "type": "boolean" }
+      }
+    },
+    "budgets": {
+      "type": "object",
+      "properties": {
+        "max_latency_ms": { "type": "integer", "minimum": 1 },
+        "max_cost_usd": { "type": "number", "minimum": 0 }
+      }
+    },
+    "tests": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id","prompt","expects"],
+        "properties": {
+          "id": { "type": "string" },
+          "prompt": { "type": "string" },
+          "context": { "type": "object" },
+          "expects": {
+            "type": "object",
+            "properties": {
+              "contains": { "type": "array", "items": { "type": "string" } },
+              "not_contains": { "type": "array", "items": { "type": "string" } },
+              "blocked": { "type": "boolean" },
+              "tool_calls": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["name"],
+                  "properties": {
+                    "name": { "type": "string" },
+                    "schema_ok": { "type": "boolean" }
+                  },
+                  "additionalProperties": false
+                }
+              }
+              , "grounded_to": { "type": "array", "items": { "type": "string" } }
+              , "require_source_mentions": { "type": "boolean" }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "oneOf": [
+    { "required": ["tests"] },
+    { "required": ["include_packs"] },
+    { "required": ["tests", "include_packs"] }
+  ],
+  "additionalProperties": false
+}
