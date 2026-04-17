@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>AgentMLOps Maturity Report{% if assessment.org_name %} — {{ assessment.org_name }}{% endif %}</title>
+  <style>
+    *{box-sizing:border-box}
+    body{font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;margin:0;line-height:1.5;background:#f8fafc;color:#1e293b}
+    .wrap{max-width:1100px;margin:0 auto;padding:24px 20px}
+    h1{font-size:1.5rem;font-weight:800;margin:0 0 4px}
+    h2{font-size:1.1rem;font-weight:700;margin:24px 0 12px;color:#334155}
+    .meta{font-size:0.85rem;color:#64748b}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin:16px 0}
+    .card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;text-align:center}
+    .score-val{font-size:2rem;font-weight:800;line-height:1.1}
+    .score-label{font-size:0.72rem;color:#64748b;text-transform:uppercase;letter-spacing:0.05em;margin-top:4px}
+    .level-badge{display:inline-flex;align-items:center;gap:4px;border-radius:9999px;padding:4px 14px;font-weight:600;font-size:0.8rem}
+    .l1{background:#fee2e2;color:#991b1b}
+    .l2{background:#ffedd5;color:#9a3412}
+    .l3{background:#fef9c3;color:#854d0e}
+    .l4{background:#d1fae5;color:#065f46}
+    .l5{background:#dbeafe;color:#1e40af}
+    table{border-collapse:collapse;width:100%;font-size:0.85rem;margin:8px 0}
+    th{text-align:left;font-weight:600;color:#64748b;border-bottom:2px solid #e2e8f0;padding:8px 10px}
+    td{border-bottom:1px solid #f1f5f9;padding:8px 10px;vertical-align:top}
+    tr:hover{background:#f8fafc}
+    .radar-wrap{display:flex;justify-content:center;margin:20px 0}
+    .roadmap-item{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px 18px;margin-bottom:10px}
+    .roadmap-week{font-weight:700;color:#4f46e5;font-size:0.85rem}
+    .roadmap-dim{font-size:0.78rem;color:#64748b;margin-top:2px}
+    .roadmap-action{margin-top:4px;font-size:0.88rem}
+    .roadmap-feature{font-size:0.78rem;color:#059669;margin-top:2px}
+    .cta{display:inline-block;background:#4f46e5;color:#fff;border-radius:8px;padding:10px 24px;font-weight:600;text-decoration:none;margin-top:16px;font-size:0.9rem}
+    .cta:hover{background:#4338ca}
+    .gap-card{background:#fff;border-left:4px solid #dc2626;border-radius:0 10px 10px 0;padding:12px 16px;margin-bottom:10px}
+    .gap-dim{font-weight:700;font-size:0.9rem}
+    .gap-desc{font-size:0.82rem;color:#64748b;margin-top:2px}
+    .gap-action{font-size:0.82rem;color:#4f46e5;margin-top:4px;font-weight:500}
+    footer{margin-top:32px;padding-top:16px;border-top:1px solid #e2e8f0;font-size:0.75rem;color:#94a3b8}
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>AgentMLOps Maturity Report</h1>
+  <p class="meta">
+    {% if assessment.org_name %}<strong>Organization:</strong> {{ assessment.org_name }} &middot;{% endif %}
+    <strong>Assessment:</strong> {{ assessment.id }} &middot; {{ assessment.created_at }}
+  </p>
+
+  <!-- Overall Score -->
+  <div style="text-align:center;margin:24px 0">
+    <div class="score-val" style="font-size:3.5rem;color:{% if assessment.overall_level >= 4 %}#059669{% elif assessment.overall_level >= 3 %}#d97706{% else %}#dc2626{% endif %}">
+      L{{ assessment.overall_level }}
+    </div>
+    <div class="score-label" style="font-size:1rem">{{ assessment.overall_level_name }} ({{ assessment.overall_score }}/5.0)</div>
+  </div>
+
+  <!-- Radar Chart (SVG) -->
+  <div class="radar-wrap">
+    <svg viewBox="0 0 400 400" width="360" height="360" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <style>
+          .radar-grid{stroke:#e2e8f0;fill:none;stroke-width:1}
+          .radar-axis{stroke:#cbd5e1;stroke-width:1}
+          .radar-label{font-size:11px;fill:#475569;font-family:system-ui,sans-serif}
+          .radar-area{fill:rgba(79,70,229,0.15);stroke:#4f46e5;stroke-width:2}
+          .radar-dot{fill:#4f46e5}
+        </style>
+      </defs>
+      <!-- Grid rings for levels 1-5 -->
+      {% for ring in radar.grid_rings %}
+      <polygon class="radar-grid" points="{{ ring }}"/>
+      {% endfor %}
+      <!-- Axes -->
+      {% for axis in radar.axes %}
+      <line class="radar-axis" x1="200" y1="200" x2="{{ axis.x2 }}" y2="{{ axis.y2 }}"/>
+      {% endfor %}
+      <!-- Data polygon -->
+      <polygon class="radar-area" points="{{ radar.data_polygon }}"/>
+      <!-- Data dots + labels -->
+      {% for i in range(radar.data_points|length) %}
+      <circle class="radar-dot" cx="{{ radar.data_points[i].x }}" cy="{{ radar.data_points[i].y }}" r="4"/>
+      <text class="radar-label" x="{{ radar.labels[i].x }}" y="{{ radar.labels[i].y }}" text-anchor="middle" dy="0.35em">{{ radar.labels[i].text }}</text>
+      {% endfor %}
+    </svg>
+  </div>
+
+  <!-- Dimension Scores -->
+  <h2>Dimension Scores</h2>
+  <div class="grid">
+    {% for ds in assessment.dimension_scores %}
+    <div class="card">
+      <div class="score-val" style="color:{% if ds.level >= 4 %}#059669{% elif ds.level >= 3 %}#d97706{% else %}#dc2626{% endif %}">L{{ ds.level }}</div>
+      <div class="score-label">{{ ds.label }}</div>
+      <div style="margin-top:6px">
+        <span class="level-badge l{{ ds.level }}">{{ ds.level_name }}</span>
+      </div>
+      <div style="font-size:0.75rem;color:#94a3b8;margin-top:4px">{{ ds.score }}/5.0</div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Gaps -->
+  {% if assessment.gaps %}
+  <h2>Gaps to Close ({{ assessment.gaps|length }} dimensions below L4)</h2>
+  {% for gap in assessment.gaps %}
+  <div class="gap-card">
+    <div class="gap-dim">{{ gap.label }} — currently L{{ gap.current_level }} ({{ gap.current_name }})</div>
+    <div class="gap-desc">{{ gap.gap_description }}</div>
+    <div class="gap-action">Fix with AAH: {{ gap.aah_action }}</div>
+  </div>
+  {% endfor %}
+  {% else %}
+  <div class="card" style="text-align:center;margin:16px 0;padding:24px">
+    <div style="font-size:1.2rem;font-weight:700;color:#059669">No gaps — all dimensions at L4+</div>
+  </div>
+  {% endif %}
+
+  <!-- 90-Day Roadmap -->
+  {% if assessment.roadmap_90d %}
+  <h2>90-Day Roadmap</h2>
+  {% for item in assessment.roadmap_90d %}
+  <div class="roadmap-item">
+    <div class="roadmap-week">{{ item.week_range }}</div>
+    <div class="roadmap-dim">{{ item.label }} (Priority {{ item.priority }})</div>
+    <div class="roadmap-action">{{ item.action }}</div>
+    <div class="roadmap-feature">AAH Feature: {{ item.aah_feature }}</div>
+  </div>
+  {% endfor %}
+  {% endif %}
+
+  <!-- CTA -->
+  <div style="text-align:center;margin:32px 0">
+    <p style="font-size:0.95rem;color:#475569">Ready to close the gaps?</p>
+    <a class="cta" href="/">Run Your First AAH Evaluation &rarr;</a>
+  </div>
+
+  <footer>
+    Generated by AAH AgentMLOps Maturity Console &middot; {{ assessment.created_at }}
+  </footer>
+
+</div>
+</body>
+</html>

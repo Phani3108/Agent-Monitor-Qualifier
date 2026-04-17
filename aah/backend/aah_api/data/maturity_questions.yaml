@@ -1,0 +1,344 @@
+# AgentMLOps Maturity Assessment — Question Bank
+# Each dimension maps 1:1 to an AAH runner.
+# Option scores: 1 = L1 (Ad-hoc), 2 = L2 (Repeatable), 3 = L3 (Defined),
+#                4 = L4 (Managed), 5 = L5 (Optimized)
+
+dimensions:
+  versioning:
+    label: Versioning
+    runner: policy_lint
+    description: Agent prompt versioning, config-as-code, and change tracking
+    l5_target: GitOps-managed agent configs with schema validation on every change
+    questions:
+      - id: ver-01
+        text: How are agent prompts managed?
+        options:
+          - label: Ad-hoc edits in a UI or notebook
+            score: 1
+          - label: Stored in a shared document with manual updates
+            score: 2
+          - label: Checked into version control (Git)
+            score: 3
+          - label: GitOps workflow with PR reviews
+            score: 4
+          - label: GitOps with automated schema validation and lint on every PR
+            score: 5
+      - id: ver-02
+        text: Can you trace which prompt version produced a given agent output?
+        options:
+          - label: No traceability
+            score: 1
+          - label: Manual lookup in deploy logs
+            score: 2
+          - label: Version tags recorded but not on every response
+            score: 3
+          - label: Version tag on most responses via metadata
+            score: 4
+          - label: Immutable version hash on every response with audit trail
+            score: 5
+      - id: ver-03
+        text: Do prompt changes go through a review process?
+        options:
+          - label: No review — anyone can edit directly
+            score: 1
+          - label: Informal peer review (Slack, email)
+            score: 2
+          - label: Pull request required but no automated checks
+            score: 3
+          - label: PR required with manual test verification
+            score: 4
+          - label: PR-gated with automated policy lint and regression tests
+            score: 5
+
+  canary_rollback:
+    label: Canary / Rollback
+    runner: functional
+    description: Staged rollout, A/B testing, and rollback automation
+    l5_target: Automated canary deployments with functional regression gates
+    questions:
+      - id: can-01
+        text: How do you deploy agent changes to production?
+        options:
+          - label: Direct push — changes go live immediately
+            score: 1
+          - label: Manual staging test then push
+            score: 2
+          - label: Staging environment with manual sign-off
+            score: 3
+          - label: Canary rollout to a percentage of traffic
+            score: 4
+          - label: Automated canary with functional regression gates and auto-rollback
+            score: 5
+      - id: can-02
+        text: Can you roll back a bad agent deployment?
+        options:
+          - label: No rollback — must fix forward
+            score: 1
+          - label: Manual redeploy of previous version
+            score: 2
+          - label: Documented rollback procedure exists
+            score: 3
+          - label: One-click rollback with health checks
+            score: 4
+          - label: Automated rollback triggered by regression detection
+            score: 5
+      - id: can-03
+        text: Do you run regression tests before promoting agent changes?
+        options:
+          - label: No regression testing
+            score: 1
+          - label: Manual spot-checks
+            score: 2
+          - label: Scripted tests run manually before deploy
+            score: 3
+          - label: Automated tests in CI but not blocking
+            score: 4
+          - label: Automated functional test pack blocks promotion if failures
+            score: 5
+
+  drift_detection:
+    label: Drift Detection
+    runner: determinism
+    description: Output stability monitoring and behavioral drift alerting
+    l5_target: Continuous N-sample determinism checks with automated drift alerts
+    questions:
+      - id: dri-01
+        text: Do you monitor agent output consistency over time?
+        options:
+          - label: No monitoring
+            score: 1
+          - label: Occasional manual review of outputs
+            score: 2
+          - label: Periodic batch comparison of outputs
+            score: 3
+          - label: Scheduled determinism sampling with dashboards
+            score: 4
+          - label: Continuous N-sample determinism checks with automated alerting
+            score: 5
+      - id: dri-02
+        text: How do you detect behavioral changes after model updates?
+        options:
+          - label: User complaints are the signal
+            score: 1
+          - label: Manual A/B comparison after updates
+            score: 2
+          - label: Diff reports generated but not automated
+            score: 3
+          - label: Automated diff with threshold-based warnings
+            score: 4
+          - label: Statistical drift detection with p-value alerts and auto-block
+            score: 5
+      - id: dri-03
+        text: Do you track latency and cost drift?
+        options:
+          - label: No tracking
+            score: 1
+          - label: Monthly billing review
+            score: 2
+          - label: Per-agent cost dashboards
+            score: 3
+          - label: p95 latency and cost budgets with dashboards
+            score: 4
+          - label: Real-time p95 latency + cost budgets with automated alerting
+            score: 5
+
+  eval_pipelines:
+    label: Eval Pipelines
+    runner: grounding
+    description: Automated evaluation and grounding verification in CI
+    l5_target: Source-grounded eval pipelines running in every PR
+    questions:
+      - id: eva-01
+        text: Do you have automated evaluation of agent responses?
+        options:
+          - label: No automated evaluation
+            score: 1
+          - label: Manual spot-checking by humans
+            score: 2
+          - label: Scripted eval suite run ad-hoc
+            score: 3
+          - label: Automated eval pipeline in CI
+            score: 4
+          - label: CI-integrated eval with source-grounded verification on every PR
+            score: 5
+      - id: eva-02
+        text: Are evaluations grounded to source-of-truth documents?
+        options:
+          - label: No source-of-truth reference
+            score: 1
+          - label: Informal reference docs exist
+            score: 2
+          - label: Source docs defined but not checked automatically
+            score: 3
+          - label: TF-IDF or keyword grounding verification
+            score: 4
+          - label: Semantic grounding with passage-level evidence and scoring
+            score: 5
+      - id: eva-03
+        text: How often do evaluation suites run?
+        options:
+          - label: Never or rarely
+            score: 1
+          - label: Before major releases only
+            score: 2
+          - label: Weekly scheduled runs
+            score: 3
+          - label: On every deployment
+            score: 4
+          - label: On every PR and continuously in production
+            score: 5
+
+  cost_attribution:
+    label: Cost Attribution
+    runner: compliance
+    description: Token and cost tracking, budget enforcement per tenant
+    l5_target: Per-tenant cost budgets with automated enforcement
+    questions:
+      - id: cos-01
+        text: Can you attribute LLM costs to specific agents or tenants?
+        options:
+          - label: Single aggregated bill — no visibility
+            score: 1
+          - label: Manual spreadsheet-based cost allocation
+            score: 2
+          - label: Per-agent cost tags in billing
+            score: 3
+          - label: Per-tenant cost tracking with dashboards
+            score: 4
+          - label: Real-time per-tenant cost attribution with budget enforcement
+            score: 5
+      - id: cos-02
+        text: Do you enforce cost budgets per agent or tenant?
+        options:
+          - label: No budgets
+            score: 1
+          - label: Informal spending limits discussed in meetings
+            score: 2
+          - label: Budget thresholds defined but not enforced
+            score: 3
+          - label: Alerts when budgets are exceeded
+            score: 4
+          - label: Automated gates that block over-budget runs
+            score: 5
+      - id: cos-03
+        text: Do you track cost-per-interaction trends over time?
+        options:
+          - label: Not tracked
+            score: 1
+          - label: Monthly aggregate review
+            score: 2
+          - label: Per-agent cost trends in spreadsheets
+            score: 3
+          - label: Time-series cost dashboards with anomaly visibility
+            score: 4
+          - label: Automated cost anomaly detection with trend forecasting
+            score: 5
+
+  policy_enforcement:
+    label: Policy Enforcement
+    runner: safety
+    description: Safety guardrails, PII protection, and injection defense
+    l5_target: Zero-tolerance safety gates with adversarial test packs in CI
+    questions:
+      - id: pol-01
+        text: Do you test agents against adversarial inputs (jailbreaks, injections)?
+        options:
+          - label: No adversarial testing
+            score: 1
+          - label: Occasional manual red-teaming
+            score: 2
+          - label: Ad-hoc adversarial test scripts
+            score: 3
+          - label: Standardized adversarial test suite
+            score: 4
+          - label: Automated adversarial packs in CI with zero-tolerance gates
+            score: 5
+      - id: pol-02
+        text: How do you prevent PII leakage in agent responses?
+        options:
+          - label: Trust the model to not leak PII
+            score: 1
+          - label: Prompt instructions to avoid PII
+            score: 2
+          - label: Post-processing regex filters
+            score: 3
+          - label: Automated PII detection (Luhn, regex) with warnings
+            score: 4
+          - label: PII detection with block policy — fails run on any PII leak
+            score: 5
+      - id: pol-03
+        text: Do you have documented safety policies for agent behavior?
+        options:
+          - label: No safety policies
+            score: 1
+          - label: Informal guidelines
+            score: 2
+          - label: Written policy document exists
+            score: 3
+          - label: Policy enforced via code checks
+            score: 4
+          - label: Machine-readable policy with automated enforcement and audit trail
+            score: 5
+
+  incident_runbooks:
+    label: Incident Runbooks
+    runner: tool_robustness
+    description: Error handling, fallback strategies, and incident response
+    l5_target: Automated incident creation with runbook-driven recovery
+    questions:
+      - id: inc-01
+        text: What happens when an agent's tool call fails in production?
+        options:
+          - label: Unhandled error shown to user
+            score: 1
+          - label: Generic error message returned
+            score: 2
+          - label: Graceful fallback with logged error
+            score: 3
+          - label: Fallback with automated alerting
+            score: 4
+          - label: Graceful fallback + auto-incident creation + runbook trigger
+            score: 5
+      - id: inc-02
+        text: Do you have runbooks for common agent failure modes?
+        options:
+          - label: No runbooks
+            score: 1
+          - label: Tribal knowledge — key people know what to do
+            score: 2
+          - label: Written runbooks in a wiki
+            score: 3
+          - label: Runbooks linked to monitoring alerts
+            score: 4
+          - label: Automated runbooks that trigger remediation actions
+            score: 5
+      - id: inc-03
+        text: Do you test agent behavior under tool/service failures?
+        options:
+          - label: No failure testing
+            score: 1
+          - label: Testing only after incidents occur
+            score: 2
+          - label: Manual fault injection tests
+            score: 3
+          - label: Scheduled chaos testing suite
+            score: 4
+          - label: Automated chaos testing with 10+ failure scenarios in CI
+            score: 5
+
+levels:
+  1:
+    name: Ad-hoc
+    description: No formal processes. Agent behavior is managed reactively.
+  2:
+    name: Repeatable
+    description: Basic processes exist but are manual and inconsistent.
+  3:
+    name: Defined
+    description: Processes are documented and followed but not automated.
+  4:
+    name: Managed
+    description: Automated processes with monitoring and alerting.
+  5:
+    name: Optimized
+    description: Fully automated with continuous improvement and self-healing.

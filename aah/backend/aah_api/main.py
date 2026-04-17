@@ -29,6 +29,7 @@ from .routes.teams import router as teams_router
 from .routes.views import router as views_router
 from .routes.tags import router as tags_router
 from .routes.packs import router as packs_router
+from .routes.maturity import router as maturity_router
 
 app = FastAPI(title="AAH API", version="0.5.0")
 configure_logging()
@@ -100,3 +101,4 @@ app.include_router(teams_router)
 app.include_router(views_router)
 app.include_router(tags_router)
 app.include_router(packs_router)
+app.include_router(maturity_router)
